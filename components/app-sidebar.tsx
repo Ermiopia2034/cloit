@@ -7,10 +7,22 @@ import { cn } from "@/lib/utils"
 import { LayoutGrid, Code2, Settings2, Grid2X2, FileJson, Users2, Trophy, Menu, ChevronDown } from "lucide-react"
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>
 
+import { useSidebar } from "@/components/ui/sidebar"
+
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
+  const { openMobile, setOpenMobile } = useSidebar()
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   const [isSystemsOpen, setIsSystemsOpen] = React.useState(true)
+
+  // Handle collapse button click differently for mobile and desktop
+  const handleCollapseClick = () => {
+    if (window.innerWidth < 1024) { // lg breakpoint
+      setOpenMobile(false) // Close the sidebar on mobile
+    } else {
+      setIsCollapsed(!isCollapsed) // Toggle collapse on desktop
+    }
+  }
 
   const navItems = [
     {
@@ -58,6 +70,8 @@ export function Sidebar({ className }: SidebarProps) {
       className={cn(
         "flex h-screen flex-col bg-[#101828] text-white transition-all duration-300 rounded-[32px]",
         isCollapsed ? "w-16" : "w-64",
+        "fixed lg:relative inset-y-0 left-0 z-50", // Fixed on mobile, relative on desktop
+        !openMobile && "hidden lg:flex", // Hidden on mobile by default, always flex on desktop
         className,
       )}
     >
@@ -67,7 +81,7 @@ export function Sidebar({ className }: SidebarProps) {
             CLOIT
           </Link>
         )}
-        <button onClick={() => setIsCollapsed(!isCollapsed)} className="rounded-xl p-2 hover:bg-white/10">
+        <button onClick={handleCollapseClick} className="rounded-xl p-2 hover:bg-white/10">
           <Menu className="h-5 w-5" />
         </button>
       </div>
