@@ -1,6 +1,3 @@
 {
-  "/systems/menus/page": "app/systems/menus/page.js",
-  "/systems/properties/page": "app/systems/properties/page.js",
-  "/systems/code/page": "app/systems/code/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/_not-found/page": "app/_not-found/page.js"
 }
