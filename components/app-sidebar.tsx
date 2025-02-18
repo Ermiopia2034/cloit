@@ -15,6 +15,13 @@ export function Sidebar({ className }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = React.useState(false)
   const [isSystemsOpen, setIsSystemsOpen] = React.useState(true)
 
+  // Close mobile sidebar when clicking a link
+  const handleLinkClick = () => {
+    if (window.innerWidth < 1024) { // lg breakpoint
+      setOpenMobile(false)
+    }
+  }
+
   // Handle collapse button click differently for mobile and desktop
   const handleCollapseClick = () => {
     if (window.innerWidth < 1024) { // lg breakpoint
@@ -123,6 +130,7 @@ export function Sidebar({ className }: SidebarProps) {
                       <Link
                         key={child.title}
                         href={child.href}
+                        onClick={handleLinkClick}
                         className={cn(
                           "flex items-center gap-3 rounded-xl px-3 py-2",
 pathname === child.href
@@ -140,6 +148,7 @@ pathname === child.href
             ) : (
               <Link
                 href={item.href || "#"}
+                onClick={handleLinkClick}
                 className={cn(
                   "flex items-center gap-3 rounded-xl px-3 py-2",
                   pathname === item.href
