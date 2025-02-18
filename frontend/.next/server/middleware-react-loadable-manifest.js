@@ -1,0 +1,1 @@
+self.__REACT_LOADABLE_MANIFEST="{\"app/systems/menus/page.tsx -> @/components/menu-system\":{\"id\":\"app/systems/menus/page.tsx -> @/components/menu-system\",\"files\":[\"static/chunks/_app-pages-browser_components_menu-system_tsx.js\"]}}"
