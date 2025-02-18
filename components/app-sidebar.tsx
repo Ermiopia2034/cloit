@@ -66,14 +66,23 @@ export function Sidebar({ className }: SidebarProps) {
   ]
 
   return (
-    <div
-      className={cn(
-        "flex h-screen flex-col bg-[#101828] text-white transition-all duration-300 rounded-[32px]",
-        isCollapsed ? "w-16" : "w-64",
-        "fixed lg:relative inset-y-0 left-0 z-50", // Fixed on mobile, relative on desktop
-        !openMobile && "hidden lg:flex", // Hidden on mobile by default, always flex on desktop
-        className,
+    <>
+      {/* Overlay for mobile */}
+      {openMobile && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setOpenMobile(false)}
+          aria-hidden="true"
+        />
       )}
+      <div
+        className={cn(
+          "flex h-screen flex-col bg-[#101828] text-white transition-all duration-300 rounded-[32px]",
+          isCollapsed ? "w-16" : "w-64",
+          "fixed lg:relative inset-y-0 left-0 z-50", // Fixed on mobile, relative on desktop
+          !openMobile && "hidden lg:flex", // Hidden on mobile by default, always flex on desktop
+          className,
+        )}
     >
       <div className="flex h-16 items-center justify-between px-4">
         {!isCollapsed && (
@@ -146,6 +155,7 @@ pathname === child.href
         ))}
       </nav>
     </div>
+    </>
   )
 }
 

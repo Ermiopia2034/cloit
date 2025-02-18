@@ -1,10 +1,14 @@
 "use client"
 
+import { PageHeader } from "@/components/page-header"
+
 export default function PropertiesPage() {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Properties</h1>
-      <p>Configure system properties here.</p>
+      <PageHeader
+        title="Properties"
+        description="Configure system properties here."
+      />
     </div>
   )
 }

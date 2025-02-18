@@ -1,10 +1,14 @@
 "use client"
 
+import { PageHeader } from "@/components/page-header"
+
 export default function ApiListPage() {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">API List</h1>
-      <p>View and manage API endpoints here.</p>
+      <PageHeader
+        title="API List"
+        description="View and manage API endpoints here."
+      />
     </div>
   )
 }
