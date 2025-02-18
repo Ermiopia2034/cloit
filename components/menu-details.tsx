@@ -38,7 +38,7 @@ export function MenuDetails({ selectedItem, onUpdate }: MenuDetailsProps) {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to update menu item",
+        description: `Failed to update menu item: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       })
     } finally {

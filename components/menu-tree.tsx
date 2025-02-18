@@ -30,7 +30,7 @@ const DraggableMenuItem = ({
 
   const [{ isOver }, drop] = useDrop({
     accept: "MENU_ITEM",
-    drop: (draggedItem: { id: string; depth: number }) => {
+    drop: () => {
       // Handle drop logic here
     },
     collect: (monitor) => ({
@@ -42,9 +42,13 @@ const DraggableMenuItem = ({
   const isSelected = selectedId === item.id
 
   return (
-    <div ref={drop}>
+    <div ref={(node) => {
+        drop(node)
+      }}>
       <div
-        ref={drag}
+        ref={(node) => {
+          drag(node)
+        }}
         className={`flex items-center py-1 px-2 rounded cursor-pointer ${
           isDragging ? "opacity-50" : ""
         } ${isOver ? "bg-accent/50" : ""} ${isSelected ? "bg-[#84E538] text-[#14161F]" : "hover:bg-accent"}`}
@@ -85,7 +89,11 @@ const DraggableMenuItem = ({
   )
 }
 
-export function MenuTree() {
+interface MenuTreeProps {
+  onSelect: (item: MenuItem | null) => void
+}
+
+export function MenuTree({ onSelect }: MenuTreeProps) {
   const [menuData, setMenuData] = useState<MenuItem[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedId, setSelectedId] = useState<string | null>(null)
@@ -101,7 +109,7 @@ export function MenuTree() {
       const data = await response.json()
       setMenuData(data)
     } catch (err) {
-      setError("Failed to load menu data")
+      setError(`Failed to load menu data: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
       setLoading(false)
     }
@@ -174,7 +182,10 @@ export function MenuTree() {
               item={item}
               depth={0}
               onToggle={toggleExpand}
-              onSelect={(item) => setSelectedId(item.id)}
+              onSelect={(item) => {
+                setSelectedId(item.id);
+                onSelect(item);
+              }}
               selectedId={selectedId}
             />
           ))}

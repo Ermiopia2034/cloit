@@ -6,7 +6,25 @@ import { useState } from "react"
 import type { MenuItem } from "@/types/menu"
 
 export default function MenusPage() {
-  const [selectedItem, setSelectedItem] = useState<MenuItem | null>(null)
+  const [selectedItem, setSelectedItem] = useState<{
+    id: string
+    name: string
+    depth: number
+    parentName?: string
+  } | null>(null)
+
+  const handleMenuSelect = (item: MenuItem | null) => {
+    if (!item) {
+      setSelectedItem(null)
+      return
+    }
+    setSelectedItem({
+      id: item.id,
+      name: item.name,
+      depth: item.depth ?? 0,
+      parentName: item.parentId
+    })
+  }
 
   const handleUpdate = async (id: string, updates: { name: string }) => {
     const response = await fetch("/api/menus", {
@@ -29,7 +47,7 @@ export default function MenusPage() {
         <div className="text-sm text-muted-foreground">Menu</div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <MenuTree onSelect={setSelectedItem} />
+        <MenuTree onSelect={handleMenuSelect} />
         <MenuDetails selectedItem={selectedItem} onUpdate={handleUpdate} />
       </div>
     </div>
