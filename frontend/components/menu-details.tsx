@@ -49,7 +49,7 @@ export function MenuDetails({ selectedItem, onUpdate }: MenuDetailsProps) {
   if (!selectedItem) {
     return (
       <div className="border rounded-lg p-6">
-        <p className="text-muted-foreground text-center">Select a menu item to view details</p>
+        <p className="text-muted-foreground text-center">Select a menu item  to view details</p>
       </div>
     )
   }
