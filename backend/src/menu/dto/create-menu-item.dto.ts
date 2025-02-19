@@ -1,11 +1,11 @@
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsUrl } from 'class-validator';
 
 export class CreateMenuItemDto {
   @IsString()
   label: string;
 
-  @IsString()
   @IsOptional()
+  @IsUrl()
   url?: string;
 
   @IsString()
