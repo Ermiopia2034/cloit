@@ -40,7 +40,7 @@ export class MenuController {
   ) {
     const menu = await this.menuService.update(id, dto);
     if (!menu) {
-      throw new NotFoundException(`Menu item with ID ${id} not found`);
+      throw new NotFoundException(`Menu items with ID ${id} not found`);
     }
     return menu;
   }
