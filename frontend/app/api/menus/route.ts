@@ -1,78 +1,112 @@
 import { NextResponse } from "next/server"
-import type { MenuItem } from "@/types/menu"
 
-// This would typically come from a database
-let menuData: MenuItem[] = [
-  {
-    id: "1",
-    name: "system management",
-    children: [
-      {
-        id: "2",
-        name: "System Management",
-        children: [
-          {
-            id: "3",
-            name: "Systems",
-            children: [
-              {
-                id: "4",
-                name: "System Code",
-                children: [
-                  { id: "5", name: "Code Registration" },
-                  { id: "6", name: "Code Registration - 2" },
-                ],
-              },
-              {
-                id: "7",
-                name: "Properties",
-              },
-              {
-                id: "8",
-                name: "Menus",
-                children: [{ id: "9", name: "Menu Registration" }],
-              },
-              {
-                id: "10",
-                name: "API List",
-                children: [
-                  { id: "11", name: "API Registration" },
-                  { id: "12", name: "API Edit" },
-                ],
-              },
-            ],
-          },
-        ],
-      },
-    ],
-  },
-]
+const API_BASE_URL = 'https://cloit-r65k.onrender.com'
 
-export async function GET() {
-  return NextResponse.json(menuData)
+export async function GET(req: Request) {
+  const url = new URL(req.url)
+  const id = url.searchParams.get('id')
+  const depth = url.searchParams.get('depth')
+
+  let apiUrl = `${API_BASE_URL}/menu`
+  if (id) {
+    apiUrl += `/${id}`
+    if (depth) {
+      apiUrl += `?depth=${depth}`
+    }
+  }
+
+  try {
+    const response = await fetch(apiUrl)
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`)
+    }
+    const data = await response.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to fetch menu data' },
+      { status: 500 }
+    )
+  }
 }
 
 export async function POST(req: Request) {
-  const data = await req.json()
-  menuData = data
-  return NextResponse.json({ success: true })
+  try {
+    const body = await req.json()
+    const response = await fetch(`${API_BASE_URL}/menu`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to create menu item' },
+      { status: 500 }
+    )
+  }
 }
 
 export async function PATCH(req: Request) {
-  const data = await req.json()
-  const updateMenu = (items: MenuItem[], id: string, updates: Partial<MenuItem>): MenuItem[] => {
-    return items.map((item) => {
-      if (item.id === id) {
-        return { ...item, ...updates }
-      }
-      if (item.children) {
-        return { ...item, children: updateMenu(item.children, id, updates) }
-      }
-      return item
-    })
-  }
+  try {
+    const body = await req.json()
+    const { id, updates } = body
 
-  menuData = updateMenu(menuData, data.id, data.updates)
-  return NextResponse.json({ success: true })
+    const response = await fetch(`${API_BASE_URL}/menu/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updates),
+    })
+
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to update menu item' },
+      { status: 500 }
+    )
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url)
+    const id = url.searchParams.get('id')
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Menu item ID is required' },
+        { status: 400 }
+      )
+    }
+
+    const response = await fetch(`${API_BASE_URL}/menu/${id}`, {
+      method: 'DELETE',
+    })
+
+    if (!response.ok) {
+      throw new Error(`API responded with status: ${response.status}`)
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to delete menu item' },
+      { status: 500 }
+    )
+  }
 }
 

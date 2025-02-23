@@ -105,9 +105,22 @@ export function MenuTree({ onSelect }: MenuTreeProps) {
 
   const fetchMenuData = async () => {
     try {
+      setLoading(true)
+      setError(null)
       const response = await fetch("/api/menus")
+      if (!response.ok) {
+        throw new Error(`API responded with status: ${response.status}`)
+      }
       const data = await response.json()
-      setMenuData(data)
+      // Transform the data to include isExpanded property
+      const addExpandedProperty = (items: MenuItem[]): MenuItem[] => {
+        return items.map(item => ({
+          ...item,
+          isExpanded: false,
+          children: item.children ? addExpandedProperty(item.children) : undefined
+        }))
+      }
+      setMenuData(addExpandedProperty(data))
     } catch (err) {
       setError(`Failed to load menu data: ${err instanceof Error ? err.message : 'Unknown error'}`)
     } finally {
