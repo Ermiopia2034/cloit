@@ -27,7 +27,7 @@ export function Sidebar({ className }: SidebarProps) {
     if (window.innerWidth < 1024) { // lg breakpoint
       setOpenMobile(false) // Close the sidebar on mobile
     } else {
-      setIsCollapsed(!isCollapsed) // Toggle collapse on desktop
+      setIsCollapsed(!isCollapsed) // Toggle coll apse on desktop
     }
   }
 
