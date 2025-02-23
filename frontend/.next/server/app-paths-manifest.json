@@ -1,11 +1,11 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/api/menus/route": "app/api/menus/route.js",
   "/competition/page": "app/competition/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/menus/route": "app/api/menus/route.js",
   "/menus/page": "app/menus/page.js",
-  "/systems/api-list/page": "app/systems/api-list/page.js",
   "/page": "app/page.js",
+  "/systems/api-list/page": "app/systems/api-list/page.js",
   "/systems/code/page": "app/systems/code/page.js",
   "/systems/menus/page": "app/systems/menus/page.js",
   "/systems/page": "app/systems/page.js",

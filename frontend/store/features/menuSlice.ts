@@ -1,5 +1,6 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, ActionReducerMapBuilder } from '@reduxjs/toolkit';
 import type { MenuItem, MenuState } from '@/types/menu';
+import { menuService } from '@/services/menuService';
 
 const initialState: MenuState = {
   items: [],
@@ -11,46 +12,36 @@ const initialState: MenuState = {
 export const fetchMenuItems = createAsyncThunk(
   'menu/fetchMenuItems',
   async () => {
-    const response = await fetch('/api/menus');
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+    try {
+      const items = await menuService.getAllMenuItems();
+      return items;
+    } catch (error) {
+      throw new Error('Failed to fetch menu items');
     }
-    const data = await response.json();
-    return data;
   }
 );
 
 export const createMenuItem = createAsyncThunk(
   'menu/createMenuItem',
   async (item: Omit<MenuItem, 'id'>) => {
-    const response = await fetch('/api/menus', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(item),
-    });
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+    try {
+      const newItem = await menuService.createMenuItem(item);
+      return newItem;
+    } catch (error) {
+      throw new Error('Failed to create menu item');
     }
-    return response.json();
   }
 );
 
 export const updateMenuItem = createAsyncThunk(
   'menu/updateMenuItem',
   async ({ id, updates }: { id: string; updates: Partial<MenuItem> }) => {
-    const response = await fetch(`/api/menus/${id}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(updates),
-    });
-    if (!response.ok) {
-      throw new Error(`API responded with status: ${response.status}`);
+    try {
+      const updatedItem = await menuService.updateMenuItem(id, updates);
+      return updatedItem;
+    } catch (error) {
+      throw new Error('Failed to update menu item');
     }
-    return response.json();
   }
 );
 
@@ -67,7 +58,8 @@ export const deleteMenuItem = createAsyncThunk(
   }
 );
 
-const addExpandedProperty = (items: MenuItem[]): MenuItem[] => {
+const addExpandedProperty = (items: MenuItem[] | undefined): MenuItem[] => {
+  if (!items) return [];
   return items.map(item => ({
     ...item,
     isExpanded: false,
@@ -79,10 +71,10 @@ const menuSlice = createSlice({
   name: 'menu',
   initialState,
   reducers: {
-    setSelectedItem: (state, action: PayloadAction<MenuItem | null>) => {
+    setSelectedItem: (state: MenuState, action: PayloadAction<MenuItem | null>) => {
       state.selectedItem = action.payload;
     },
-    toggleExpanded: (state, action: PayloadAction<string>) => {
+    toggleExpanded: (state: MenuState, action: PayloadAction<string>) => {
       const toggleItem = (items: MenuItem[]): MenuItem[] => {
         return items.map(item => {
           if (item.id === action.payload) {
@@ -97,27 +89,27 @@ const menuSlice = createSlice({
       state.items = toggleItem(state.items);
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: (builder: ActionReducerMapBuilder<MenuState>) => {
     builder
-      .addCase(fetchMenuItems.pending, (state) => {
+      .addCase(fetchMenuItems.pending, (state: MenuState) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchMenuItems.fulfilled, (state, action) => {
+      .addCase(fetchMenuItems.fulfilled, (state: MenuState, action: PayloadAction<MenuItem[]>) => {
         state.loading = false;
         state.items = addExpandedProperty(action.payload);
       })
-      .addCase(fetchMenuItems.rejected, (state, action) => {
+      .addCase(fetchMenuItems.rejected, (state: MenuState, action: any) => {
         state.loading = false;
         state.error = action.error.message || 'Failed to fetch menu items';
       })
-      .addCase(createMenuItem.fulfilled, (state) => {
+      .addCase(createMenuItem.fulfilled, (state: MenuState) => {
         state.loading = false;
       })
-      .addCase(updateMenuItem.fulfilled, (state) => {
+      .addCase(updateMenuItem.fulfilled, (state: MenuState) => {
         state.loading = false;
       })
-      .addCase(deleteMenuItem.fulfilled, (state, action) => {
+      .addCase(deleteMenuItem.fulfilled, (state: MenuState, action: PayloadAction<string>) => {
         state.loading = false;
         const removeItem = (items: MenuItem[]): MenuItem[] => {
           return items.filter(item => {

@@ -5,6 +5,8 @@ const API_BASE_URL = 'https://cloit-r65k.onrender.com';
 export const menuService = {
   // Transform backend response to frontend model
   transformMenuItem(item: any): MenuItem {
+    if (!item) throw new Error('Cannot transform null item');
+
     return {
       id: item.id,
       name: item.label,
@@ -82,6 +84,9 @@ export const menuService = {
       method: 'DELETE',
     });
     if (!response.ok) {
+      if (response.status === 404) {
+        throw new Error(`Menu item with ID ${id} not found`);
+      }
       throw new Error('Failed to delete menu item');
     }
   },

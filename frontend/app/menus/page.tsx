@@ -4,6 +4,7 @@ import { MenuTree } from "@/components/menu-tree"
 import { MenuDetails } from "@/components/menu-details"
 import { useState } from "react"
 import type { MenuItem } from "@/types/menu"
+import { menuService } from "@/services/menuService"
 
 export default function MenusPage() {
   const [selectedItem, setSelectedItem] = useState<{
@@ -27,16 +28,13 @@ export default function MenusPage() {
   }
 
   const handleUpdate = async (id: string, updates: { name: string }) => {
-    const response = await fetch("/api/menus", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ id, updates }),
-    })
-
-    if (!response.ok) {
-      throw new Error("Failed to update menu")
+    try {
+      await menuService.updateMenuItem(id, {
+        name: updates.name
+      })
+    } catch (error) {
+      console.error('Failed to update menu:', error)
+      throw new Error('Failed to update menu')
     }
   }
 
