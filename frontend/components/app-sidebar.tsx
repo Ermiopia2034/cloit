@@ -5,7 +5,9 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { LayoutGrid, ChevronDown, Loader2 } from "lucide-react"
-import { useMenuStore } from "@/store/menuStore"
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '@/store'
+import { fetchMenuItems, toggleExpanded } from '@/store/features/menuSlice'
 import { MenuItem } from "@/types/menu"
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>
@@ -16,7 +18,7 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const { openMobile, setOpenMobile } = useSidebar()
   const [isCollapsed, setIsCollapsed] = React.useState(false)
-  const [isSystemsOpen, setIsSystemsOpen] = React.useState(true)
+  // State is now managed by Redux
 
   // Close mobile sidebar when clicking a link
   const handleLinkClick = () => {
@@ -34,11 +36,12 @@ export function Sidebar({ className }: SidebarProps) {
     }
   }
 
-  const { items, loading, error, fetchMenuItems, expandItem } = useMenuStore()
+  const dispatch = useDispatch<AppDispatch>()
+  const { items, loading, error } = useSelector((state: RootState) => state.menu)
 
   React.useEffect(() => {
-    fetchMenuItems()
-  }, [])
+    dispatch(fetchMenuItems())
+  }, [dispatch])
 
   const renderMenuItem = (item: MenuItem) => {
     const hasChildren = item.children && item.children.length > 0
@@ -55,7 +58,7 @@ export function Sidebar({ className }: SidebarProps) {
           )}
           onClick={() => {
             if (hasChildren) {
-              expandItem(item.id, !item.isExpanded)
+              dispatch(toggleExpanded(item.id))
             } else if (item.href) {
               handleLinkClick()
             }

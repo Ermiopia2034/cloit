@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import { Sidebar } from "@/components/app-sidebar"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { Providers } from "./providers"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -20,12 +21,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} bg-background`}>
-        <SidebarProvider>
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 overflow-x-hidden">{children}</main>
-          </div>
-        </SidebarProvider>
+        <Providers>
+          <SidebarProvider>
+            <div className="flex min-h-screen">
+              <Sidebar />
+              <main className="flex-1 overflow-x-hidden">{children}</main>
+            </div>
+          </SidebarProvider>
+        </Providers>
       </body>
     </html>
   )

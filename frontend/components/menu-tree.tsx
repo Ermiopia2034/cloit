@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button"
 import { ChevronRight, ChevronDown, Loader2 } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useEffect } from "react"
 import type { MenuItem } from "@/types/menu"
 import { useDrag, useDrop, DndProvider } from "react-dnd"
 import { HTML5Backend } from "react-dnd-html5-backend"
+import { useDispatch, useSelector } from 'react-redux'
+import { AppDispatch, RootState } from '@/store'
+import { fetchMenuItems, setSelectedItem, toggleExpanded } from '@/store/features/menuSlice'
 
 const DraggableMenuItem = ({
   item,
@@ -94,75 +97,46 @@ interface MenuTreeProps {
 }
 
 export function MenuTree({ onSelect }: MenuTreeProps) {
-  const [menuData, setMenuData] = useState<MenuItem[]>([])
-  const [loading, setLoading] = useState(true)
-  const [selectedId, setSelectedId] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const dispatch = useDispatch<AppDispatch>()
+  const { items: menuData, loading, error, selectedItem } = useSelector((state: RootState) => state.menu)
+  const selectedId = selectedItem?.id || null
 
   useEffect(() => {
-    fetchMenuData()
-  }, [])
+    dispatch(fetchMenuItems())
+  }, [dispatch])
 
-  const fetchMenuData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      const response = await fetch("/api/menus")
-      if (!response.ok) {
-        throw new Error(`API responded with status: ${response.status}`)
-      }
-      const data = await response.json()
-      // Transform the data to include isExpanded property
-      const addExpandedProperty = (items: MenuItem[]): MenuItem[] => {
-        return items.map(item => ({
-          ...item,
-          isExpanded: false,
-          children: item.children ? addExpandedProperty(item.children) : undefined
-        }))
-      }
-      setMenuData(addExpandedProperty(data))
-    } catch (err) {
-      setError(`Failed to load menu data: ${err instanceof Error ? err.message : 'Unknown error'}`)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const toggleExpand = (id: string) => {
-    const toggleItem = (items: MenuItem[]): MenuItem[] => {
-      return items.map((item) => {
-        if (item.id === id) {
-          return { ...item, isExpanded: !item.isExpanded }
-        }
-        if (item.children) {
-          return { ...item, children: toggleItem(item.children) }
-        }
-        return item
-      })
-    }
-    setMenuData(toggleItem(menuData))
+  const handleToggleExpand = (id: string) => {
+    dispatch(toggleExpanded(id))
   }
 
   const expandAll = () => {
-    const expandItems = (items: MenuItem[]): MenuItem[] => {
-      return items.map((item) => ({
-        ...item,
-        isExpanded: true,
-        children: item.children ? expandItems(item.children) : undefined,
-      }))
-    }
-    setMenuData(expandItems(menuData))
+    menuData.forEach((item: MenuItem) => {
+      if (!item.isExpanded) {
+        dispatch(toggleExpanded(item.id))
+      }
+      if (item.children) {
+        item.children.forEach((child: MenuItem) => {
+          if (!child.isExpanded) {
+            dispatch(toggleExpanded(child.id))
+          }
+        })
+      }
+    })
   }
 
   const collapseAll = () => {
-    const collapseItems = (items: MenuItem[]): MenuItem[] => {
-      return items.map((item) => ({
-        ...item,
-        isExpanded: false,
-        children: item.children ? collapseItems(item.children) : undefined,
-      }))
-    }
-    setMenuData(collapseItems(menuData))
+    menuData.forEach((item: MenuItem) => {
+      if (item.isExpanded) {
+        dispatch(toggleExpanded(item.id))
+      }
+      if (item.children) {
+        item.children.forEach((child: MenuItem) => {
+          if (child.isExpanded) {
+            dispatch(toggleExpanded(child.id))
+          }
+        })
+      }
+    })
   }
 
   if (loading) {
@@ -189,14 +163,14 @@ export function MenuTree({ onSelect }: MenuTreeProps) {
           </Button>
         </div>
         <div className="mt-4">
-          {menuData.map((item) => (
+          {menuData.map((item: MenuItem) => (
             <DraggableMenuItem
               key={item.id}
               item={item}
               depth={0}
-              onToggle={toggleExpand}
-              onSelect={(item) => {
-                setSelectedId(item.id);
+              onToggle={handleToggleExpand}
+              onSelect={(item: MenuItem) => {
+                dispatch(setSelectedItem(item));
                 onSelect(item);
               }}
               selectedId={selectedId}

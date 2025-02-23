@@ -23,8 +23,9 @@ export async function GET(req: Request) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to fetch menu data'
     return NextResponse.json(
-      { error: 'Failed to fetch menu data' },
+      { error: message },
       { status: 500 }
     )
   }
@@ -48,8 +49,9 @@ export async function POST(req: Request) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to create menu item'
     return NextResponse.json(
-      { error: 'Failed to create menu item' },
+      { error: message },
       { status: 500 }
     )
   }
@@ -75,8 +77,9 @@ export async function PATCH(req: Request) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to update menu item'
     return NextResponse.json(
-      { error: 'Failed to update menu item' },
+      { error: message },
       { status: 500 }
     )
   }
@@ -103,8 +106,9 @@ export async function DELETE(req: Request) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    const message = error instanceof Error ? error.message : 'Failed to delete menu item'
     return NextResponse.json(
-      { error: 'Failed to delete menu item' },
+      { error: message },
       { status: 500 }
     )
   }
