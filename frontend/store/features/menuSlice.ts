@@ -58,6 +58,23 @@ export const deleteMenuItem = createAsyncThunk(
   }
 );
 
+export const saveMenu = createAsyncThunk(
+  'menu/saveMenu',
+  async (_, { getState }) => {
+    try {
+      // Get the current menu items from the state
+      const state = getState() as { menu: MenuState };
+      const items = state.menu.items;
+      
+      // Call the service method to save the menu
+      const updatedItems = await menuService.saveMenu(items);
+      return updatedItems;
+    } catch (error) {
+      throw new Error('Failed to save menu structure');
+    }
+  }
+);
+
 const addExpandedProperty = (items: MenuItem[] | undefined): MenuItem[] => {
   if (!items) return [];
   return items.map(item => ({
@@ -121,6 +138,14 @@ const menuSlice = createSlice({
           });
         };
         state.items = removeItem(state.items);
+      })
+      .addCase(saveMenu.fulfilled, (state: MenuState, action: PayloadAction<MenuItem[]>) => {
+        state.loading = false;
+        state.items = action.payload;
+      })
+      .addCase(saveMenu.rejected, (state: MenuState, action: any) => {
+        state.loading = false;
+        state.error = action.error.message || 'Failed to save menu structure';
       });
   },
 });

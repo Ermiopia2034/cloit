@@ -90,4 +90,36 @@ export const menuService = {
       throw new Error('Failed to delete menu item');
     }
   },
+
+  // Transform frontend model to backend DTO
+  transformMenuItemToDto(item: MenuItem): any {
+    return {
+      id: item.id,
+      label: item.name,
+      url: item.href,
+      parentId: item.parentId,
+      children: item.children ? item.children.map(child => this.transformMenuItemToDto(child)) : []
+    };
+  },
+
+  async saveMenu(items: MenuItem[]): Promise<MenuItem[]> {
+    const dto = {
+      items: items.map(item => this.transformMenuItemToDto(item))
+    };
+    
+    const response = await fetch(`${API_BASE_URL}/menu/save`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dto),
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to save menu structure');
+    }
+    
+    const data = await response.json();
+    return this.transformMenuItems(data);
+  },
 };

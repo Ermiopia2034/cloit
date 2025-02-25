@@ -3,6 +3,7 @@ import { Get, Post, Body, Patch, Param, Delete, Query, NotFoundException } from 
 import { MenuService } from './menu.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { SaveMenuDto } from './dto/save-menu.dto';
 
 @Controller('menu')
 export class MenuController {
@@ -10,8 +11,8 @@ export class MenuController {
 
   // Get full menu hierarchy
   @Get()
-  async getFullMenu() {
-    return this.menuService.findAll();
+  async getFullMenu(@Query('depth') depth?: number) {
+    return this.menuService.findAll(depth);
   }
 
   // Get specific menu with depth
@@ -52,5 +53,11 @@ export class MenuController {
       throw new NotFoundException(`Menu item with ID ${id} not found`);
     }
     return menu;
+  }
+
+  // Save entire menu structure
+  @Post('save')
+  async saveMenu(@Body() dto: SaveMenuDto) {
+    return this.menuService.saveMenu(dto);
   }
 }
