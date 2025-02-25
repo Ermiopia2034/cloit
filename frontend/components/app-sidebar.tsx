@@ -4,8 +4,24 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutGrid, ChevronDown, Loader2, Code2, Settings2, Grid2X2, FileJson, Users2, Trophy } from "lucide-react"
+import { LayoutGrid, ChevronDown, Code2, Settings2, Grid2X2, FileJson, Users2, Trophy } from "lucide-react"
 import { useSidebar } from "@/components/ui/sidebar"
+
+// Define types for navigation items
+interface NavItem {
+  title: string;
+  href?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  isExpandable?: boolean;
+  children?: NavChild[];
+}
+
+interface NavChild {
+  title: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  isActive?: boolean;
+}
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>
 
@@ -32,7 +48,7 @@ export function Sidebar({ className }: SidebarProps) {
   }
 
   // Static navigation items
-  const navItems = [
+  const navItems: NavItem[] = [
     {
       title: "Systems",
       icon: LayoutGrid,
@@ -73,7 +89,7 @@ export function Sidebar({ className }: SidebarProps) {
     },
   ];
 
-  const renderMenuItem = (item: any) => {
+  const renderMenuItem = (item: NavItem) => {
     const hasChildren = item.children && item.children.length > 0
     
     return (
@@ -111,7 +127,7 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
         {hasChildren && isSystemsOpen && !isCollapsed && item.children && (
           <div className="pl-4 space-y-1">
-            {item.children.map((child: any) => (
+            {item.children.map((child: NavChild) => (
               <Link
                 key={child.title}
                 href={child.href}
