@@ -4,21 +4,16 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { LayoutGrid, ChevronDown, Loader2 } from "lucide-react"
-import { useDispatch, useSelector } from 'react-redux'
-import { AppDispatch, RootState } from '@/store'
-import { fetchMenuItems, toggleExpanded } from '@/store/features/menuSlice'
-import { MenuItem } from "@/types/menu"
+import { LayoutGrid, ChevronDown, Loader2, Code2, Settings2, Grid2X2, FileJson, Users2, Trophy } from "lucide-react"
+import { useSidebar } from "@/components/ui/sidebar"
 
 type SidebarProps = React.HTMLAttributes<HTMLDivElement>
-
-import { useSidebar } from "@/components/ui/sidebar"
 
 export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const { openMobile, setOpenMobile } = useSidebar()
   const [isCollapsed, setIsCollapsed] = React.useState(false)
-  // State is now managed by Redux
+  const [isSystemsOpen, setIsSystemsOpen] = React.useState(true)
 
   // Close mobile sidebar when clicking a link
   const handleLinkClick = () => {
@@ -32,22 +27,57 @@ export function Sidebar({ className }: SidebarProps) {
     if (window.innerWidth < 1024) { // lg breakpoint
       setOpenMobile(false) // Close the sidebar on mobile
     } else {
-      setIsCollapsed(!isCollapsed) // Toggle coll apse on desktop
+      setIsCollapsed(!isCollapsed) // Toggle collapse on desktop
     }
   }
 
-  const dispatch = useDispatch<AppDispatch>()
-  const { items, loading, error } = useSelector((state: RootState) => state.menu)
+  // Static navigation items
+  const navItems = [
+    {
+      title: "Systems",
+      icon: LayoutGrid,
+      isExpandable: true,
+      children: [
+        {
+          title: "System Code",
+          href: "/systems/code",
+          icon: Code2,
+        },
+        {
+          title: "Properties",
+          href: "/systems/properties",
+          icon: Settings2,
+        },
+        {
+          title: "Menus",
+          href: "/menus",
+          icon: Grid2X2,
+          isActive: pathname === "/menus",
+        },
+        {
+          title: "API List",
+          href: "/systems/api-list",
+          icon: FileJson,
+        },
+      ],
+    },
+    {
+      title: "Users & Groups",
+      href: "/users",
+      icon: Users2,
+    },
+    {
+      title: "Competition",
+      href: "/competition",
+      icon: Trophy,
+    },
+  ];
 
-  React.useEffect(() => {
-    dispatch(fetchMenuItems())
-  }, [dispatch])
-
-  const renderMenuItem = (item: MenuItem) => {
+  const renderMenuItem = (item: any) => {
     const hasChildren = item.children && item.children.length > 0
     
     return (
-      <div key={item.id} className="space-y-1">
+      <div key={item.title} className="space-y-1">
         <div
           className={cn(
             "flex items-center gap-x-2 px-3 py-2 text-sm",
@@ -58,30 +88,46 @@ export function Sidebar({ className }: SidebarProps) {
           )}
           onClick={() => {
             if (hasChildren) {
-              dispatch(toggleExpanded(item.id))
+              setIsSystemsOpen(!isSystemsOpen);
             } else if (item.href) {
               handleLinkClick()
             }
           }}
         >
-          {item.icon && React.createElement(item.icon, { className: "h-4 w-4" })}
+          {item.icon && <item.icon className="h-4 w-4" />}
           {!isCollapsed && (
             <>
-              <span className="flex-1">{item.name}</span>
+              <span className="flex-1">{item.title}</span>
               {hasChildren && (
                 <ChevronDown
                   className={cn(
                     "h-4 w-4 transition-transform",
-                    item.isExpanded && "rotate-180"
+                    isSystemsOpen && "rotate-180"
                   )}
                 />
               )}
             </>
           )}
         </div>
-        {hasChildren && item.isExpanded && !isCollapsed && item.children && (
+        {hasChildren && isSystemsOpen && !isCollapsed && item.children && (
           <div className="pl-4 space-y-1">
-            {item.children.map((child: MenuItem) => renderMenuItem(child))}
+            {item.children.map((child: any) => (
+              <Link
+                key={child.title}
+                href={child.href}
+                className={cn(
+                  "flex items-center gap-x-2 px-3 py-2 text-sm",
+                  pathname === child.href || child.isActive
+                    ? "bg-[#9FEF00] text-black"
+                    : "text-[#98A2B3] hover:bg-[#475467] hover:text-white",
+                  "rounded-lg transition-colors"
+                )}
+                onClick={handleLinkClick}
+              >
+                {child.icon && <child.icon className="h-4 w-4" />}
+                <span>{child.title}</span>
+              </Link>
+            ))}
           </div>
         )}
       </div>
@@ -125,20 +171,11 @@ export function Sidebar({ className }: SidebarProps) {
         </div>
 
         <div className="flex-1 overflow-y-auto px-3 py-4">
-          {loading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-6 w-6 animate-spin text-[#98A2B3]" />
-            </div>
-          ) : error ? (
-            <div className="text-sm text-red-500 px-3 py-2">{error}</div>
-          ) : (
-            <nav className="space-y-1">
-              {items.map((item: MenuItem) => renderMenuItem(item))}
-            </nav>
-          )}
+          <nav className="space-y-1">
+            {navItems.map((item) => renderMenuItem(item))}
+          </nav>
         </div>
       </div>
     </>
   )
 }
-
